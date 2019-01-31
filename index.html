@@ -1,0 +1,97 @@
+<html>
+
+<head>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous">
+  </script>
+  <script type="text/javascript">
+    window.onload = function() {
+      function random(min, max) {
+        return Math.floor(Math.random() * (max - min + 1) + min);
+      }
+
+      function prob(rate) {
+        return rate >= Math.random();
+      }
+
+      function Detector() {
+        this.direction = random(1, 3);
+        this.isSpinUp = function(particle) {
+          return particle.isSpinUp(this.direction);
+        }
+      }
+
+      function EntangledParticle(spinUp) {
+      	this.isSpinUp = function(direction) {
+          switch(direction) {
+          	case 1: rate = 0.5; break;
+            case 2: rate = 0.25; break;
+            case 3: rate = 0.75; break;
+          }
+          return prob(rate) ? spinUp: !spinUp;
+        };
+      }
+
+      function EntangledParticles() {
+      	this.spinUp = prob(0.5);
+      	this.particle1 = new EntangledParticle(this.spinUp);
+      	this.particle2 = new EntangledParticle(!this.spinUp);
+      }
+
+      function HiddenInfoParticle(spinUp1, spinUp2, spinUp3) {
+      	this.isSpinUp = function(direction) {
+          switch(direction) {
+          	case 1: return spinUp1;
+            case 2: return spinUp2;
+            case 3: return spinUp3;
+          }
+        };
+      }
+
+      function HiddenInfoParticles() {
+      	this.spinUp1 = prob(0.5);
+        this.spinUp2 = prob(0.5);
+        this.spinUp3 = prob(0.5);
+      	this.particle1 = new HiddenInfoParticle(this.spinUp1, this.spinUp2, this.spinUp3);
+        this.particle2 = new HiddenInfoParticle(!this.spinUp1, !this.spinUp2, !this.spinUp3);
+      }
+
+      var runs = 0;
+      var entangledRuns = 0;
+      var hiddenRuns = 0;
+
+      setInterval(function() {
+        var detector1 = new Detector();
+        var detector2 = new Detector();
+        var entangled = new EntangledParticles();
+        var hidden = new HiddenInfoParticles();
+        if (detector1.isSpinUp(entangled.particle1) != detector2.isSpinUp(entangled.particle2)) {
+          entangledRuns++;
+        }
+        if (detector1.isSpinUp(hidden.particle1) != detector2.isSpinUp(hidden.particle2)) {
+          hiddenRuns++;
+        }
+        runs++;
+      }, 10);
+
+      setInterval(function() {
+        $("#runs").text(runs);
+        $("#entangled").text(parseFloat(100 * (entangledRuns / runs)).toFixed(2) + '%');
+        $("#hidden").text(parseFloat(100 * (hiddenRuns / runs)).toFixed(2) + '%');
+      }, 1000);
+    }
+  </script>
+</head>
+<body>
+  <div>
+    <p><a href="https://en.wikipedia.org/wiki/EPR_paradox">Einstein–Podolsky–Rosen Paradox</a><p>
+    <p><a href="https://www.youtube.com/watch?v=ZuvK-od647c">Quantum Entanglement & Spooky Action at a Distance<a></p>
+    <table border="1">
+      <tbody>
+        <tr><td>Runs</td><td id="runs">0</td></tr>
+        <tr><td>Entangled</td><td id="entangled">0%</td></tr>
+        <tr><td>Hidden Info</td><td id="hidden">0%</td></tr>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>
